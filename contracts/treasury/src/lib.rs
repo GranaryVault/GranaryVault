@@ -308,3 +308,17 @@ mod test {
         assert!(signers.contains_key(signer));
     }
 }
+
+    #[test]
+    fn test_threshold_update() {
+        let env = Env::default();
+        let owner = Address::generate(&env);
+        let contract_id = env.register(GranaryVaultTreasury, ());
+        let client = GranaryVaultTreasuryClient::new(&env, &contract_id);
+
+        client.initialize(&owner, &3);
+        assert_eq!(client.get_threshold(), 3);
+
+        client.update_threshold(&5);
+        assert_eq!(client.get_threshold(), 5);
+    }
