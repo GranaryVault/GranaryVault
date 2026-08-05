@@ -1,9 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { Box } from '@mui/material';
 import Sidebar from '@/components/Layout/Sidebar';
 import Header from '@/components/Layout/Header';
+import Breadcrumbs from '@/components/Layout/Breadcrumbs';
+import PageTransition from '@/components/Layout/PageTransition';
+import NavigationProgress from '@/components/Layout/NavigationProgress';
 
 const DRAWER_WIDTH = 280;
 
@@ -12,6 +15,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      <Suspense fallback={null}>
+        <NavigationProgress />
+      </Suspense>
       <Sidebar
         drawerWidth={DRAWER_WIDTH}
         mobileOpen={mobileOpen}
@@ -30,7 +36,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             minHeight: '100vh',
           }}
         >
-          {children}
+          <Breadcrumbs />
+          <PageTransition>{children}</PageTransition>
         </Box>
       </Box>
     </Box>
