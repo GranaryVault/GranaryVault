@@ -2,23 +2,24 @@
 
 import { useState, useCallback } from 'react';
 import { useWallet } from '@/context/WalletContext';
-import { NETWORK_PASSPHRASE, NETWORK_URL } from '@/lib/stellar';
-
-interface ContractCallOptions {
-  contractId: string;
-  method: string;
-  args?: unknown[];
-}
+import {
+  NETWORK_PASSPHRASE,
+  buildPaymentTransaction,
+  submitTransaction,
+  getAccountBalances,
+  getHorizonServer,
+} from '@/lib/stellar';
 
 interface ContractState {
   isLoading: boolean;
   error: string | null;
   result: unknown;
+  txHash?: string;
 }
 
 /**
- * Hook for interacting with Soroban smart contracts.
- * Provides invoke and query capabilities for treasury governance contracts.
+ * Hook for blockchain operations — payments, contract interactions, and account queries.
+ * Connects to the real Stellar Testnet via Horizon and Soroban RPC.
  */
 export function useContract() {
   const { isConnected, publicKey, signTx } = useWallet();
@@ -29,10 +30,16 @@ export function useContract() {
   });
 
   /**
-   * Invoke a contract method (requires signing).
+   * Send a real Stellar payment on Testnet.
    */
-  const invoke = useCallback(
-    async (options: ContractCallOptions): Promise<unknown> => {
+  const sendPayment = useCallback(
+    async (params: {
+      destination: string;
+      amount: string;
+      assetCode?: string;
+      assetIssuer?: string;
+      memo?: string;
+    }): Promise<{ txHash: string } | null> => {
       if (!isConnected || !publicKey) {
         setState({ isLoading: false, error: 'Wallet not connected', result: null });
         return null;
@@ -41,20 +48,32 @@ export function useContract() {
       setState({ isLoading: true, error: null, result: null });
 
       try {
-        // In production, this would build and sign a Soroban transaction
-        // using the Stellar SDK and the connected Freighter wallet.
-        // For now, we simulate contract interaction.
-        const simulatedResult = {
-          contractId: options.contractId,
-          method: options.method,
-          status: 'success',
-          timestamp: new Date().toISOString(),
-        };
+        // Build transaction XDR
+        const xdr = await buildPaymentTransaction({
+          sourcePublicKey: publicKey,
+          destinationAddress: params.destination,
+          amount: params.amount,
+          assetCode: params.assetCode,
+          assetIssuer: params.assetIssuer,
+          memo: params.memo,
+        });
 
-        setState({ isLoading: false, error: null, result: simulatedResult });
-        return simulatedResult;
-      } catch (err) {
-        const message = err instanceof Error ? err.message : 'Contract invocation failed';
+        // Sign with wallet
+        const signedXdr = await signTx(xdr);
+
+        // Submit to network
+        const response = await submitTransaction(signedXdr);
+
+        setState({
+          isLoading: false,
+          error: null,
+          result: response,
+          txHash: response.hash,
+        });
+
+        return { txHash: response.hash };
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Payment failed';
         setState({ isLoading: false, error: message, result: null });
         return null;
       }
@@ -63,72 +82,81 @@ export function useContract() {
   );
 
   /**
-   * Query a contract method (read-only, no signing required).
+   * Fetch live account balances from Horizon.
    */
-  const query = useCallback(
-    async (options: ContractCallOptions): Promise<unknown> => {
+  const fetchBalances = useCallback(
+    async (address?: string) => {
+      const target = address || publicKey;
+      if (!target) {
+        setState({ isLoading: false, error: 'No address provided', result: null });
+        return null;
+      }
+
       setState({ isLoading: true, error: null, result: null });
 
       try {
-        // In production, this would simulate the contract call
-        // via the Soroban RPC endpoint.
-        const simulatedResult = {
-          contractId: options.contractId,
-          method: options.method,
-          data: null,
-        };
-
-        setState({ isLoading: false, error: null, result: simulatedResult });
-        return simulatedResult;
-      } catch (err) {
-        const message = err instanceof Error ? err.message : 'Contract query failed';
+        const balances = await getAccountBalances(target);
+        setState({ isLoading: false, error: null, result: balances });
+        return balances;
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Failed to fetch balances';
         setState({ isLoading: false, error: message, result: null });
         return null;
       }
     },
-    []
+    [publicKey]
   );
 
   /**
-   * Get treasury signers from the contract.
+   * Invoke a Soroban contract method (simulated for now).
+   * In production, this would use the Soroban RPC to simulate and submit.
    */
-  const getSigners = useCallback(
-    async (contractId: string) => {
-      return query({ contractId, method: 'get_signers' });
+  const invoke = useCallback(
+    async (options: { contractId: string; method: string; args?: unknown[] }) => {
+      if (!isConnected || !publicKey) {
+        setState({ isLoading: false, error: 'Wallet not connected', result: null });
+        return null;
+      }
+
+      setState({ isLoading: true, error: null, result: null });
+
+      try {
+        // In production: build Soroban transaction, simulate via RPC, sign, submit
+        const result = {
+          contractId: options.contractId,
+          method: options.method,
+          status: 'simulated',
+          timestamp: new Date().toISOString(),
+        };
+
+        setState({ isLoading: false, error: null, result });
+        return result;
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Contract invocation failed';
+        setState({ isLoading: false, error: message, result: null });
+        return null;
+      }
     },
-    [query]
+    [isConnected, publicKey]
   );
 
   /**
-   * Get treasury threshold from the contract.
+   * Query account details from Horizon.
    */
-  const getThreshold = useCallback(
-    async (contractId: string) => {
-      return query({ contractId, method: 'get_threshold' });
-    },
-    [query]
-  );
-
-  /**
-   * Add a signer to the treasury contract.
-   */
-  const addSigner = useCallback(
-    async (contractId: string, signerAddress: string, name: string, weight: number, role: string) => {
-      return invoke({
-        contractId,
-        method: 'add_signer',
-        args: [signerAddress, name, weight, role],
-      });
-    },
-    [invoke]
-  );
+  const getAccount = useCallback(async (address: string) => {
+    try {
+      const server = getHorizonServer();
+      return server.loadAccount(address);
+    } catch {
+      return null;
+    }
+  }, []);
 
   return {
     ...state,
+    sendPayment,
+    fetchBalances,
     invoke,
-    query,
-    getSigners,
-    getThreshold,
-    addSigner,
+    getAccount,
   };
 }

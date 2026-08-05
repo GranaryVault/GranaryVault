@@ -79,11 +79,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to connect wallet';
-      setState((prev) => ({
-        ...prev,
-        isConnecting: false,
-        error: message,
-      }));
+      setState((prev) => ({ ...prev, isConnecting: false, error: message }));
     }
   }, [storeConnect]);
 
