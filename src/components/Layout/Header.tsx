@@ -19,15 +19,20 @@ import {
   NotificationsOutlined as NotificationsIcon,
   AccountBalanceWalletOutlined as WalletIcon,
   MoreVert as MoreIcon,
+  DarkMode as DarkModeIcon,
+  LightMode as LightModeIcon,
 } from '@mui/icons-material';
+import { useThemeMode } from '@/theme/ThemeRegistry';
 
 interface HeaderProps {
   drawerWidth: number;
+  onMenuClick?: () => void;
 }
 
-export default function Header({ drawerWidth }: HeaderProps) {
+export default function Header({ drawerWidth, onMenuClick }: HeaderProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { mode, toggleTheme } = useThemeMode();
 
   return (
     <AppBar
@@ -35,7 +40,10 @@ export default function Header({ drawerWidth }: HeaderProps) {
       sx={{
         width: { md: `calc(100% - ${drawerWidth}px)` },
         ml: { md: `${drawerWidth}px` },
-        backgroundColor: alpha(theme.palette.background.default, 0.85),
+        backgroundColor: alpha(
+          theme.palette.background.default,
+          mode === 'dark' ? 0.85 : 0.95
+        ),
         backdropFilter: 'blur(12px)',
         borderBottom: `1px solid ${theme.palette.divider}`,
       }}
@@ -43,7 +51,7 @@ export default function Header({ drawerWidth }: HeaderProps) {
     >
       <Toolbar sx={{ minHeight: '64px !important', px: { xs: 2, md: 4 } }}>
         {isMobile && (
-          <IconButton edge="start" sx={{ mr: 2 }} onClick={() => {}}>
+          <IconButton edge="start" sx={{ mr: 2 }} onClick={onMenuClick}>
             <MenuIcon />
           </IconButton>
         )}
@@ -54,12 +62,27 @@ export default function Header({ drawerWidth }: HeaderProps) {
             flexGrow: 1,
             fontWeight: 600,
             fontSize: { xs: '1rem', md: '1.1rem' },
+            color: 'text.primary',
           }}
         >
           Treasury Dashboard
         </Typography>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {/* Theme toggle */}
+          <Tooltip title={mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
+            <IconButton
+              onClick={toggleTheme}
+              sx={{
+                color: 'text.secondary',
+                transition: 'all 0.3s ease',
+                '&:hover': { color: 'primary.light', transform: 'rotate(20deg)' },
+              }}
+            >
+              {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
+            </IconButton>
+          </Tooltip>
+
           <Tooltip title="Connect Wallet">
             <Button
               variant="outlined"
@@ -68,7 +91,7 @@ export default function Header({ drawerWidth }: HeaderProps) {
               sx={{
                 borderRadius: 2.5,
                 borderColor: alpha(theme.palette.primary.main, 0.4),
-                color: 'primary.light',
+                color: 'primary.main',
                 textTransform: 'none',
                 fontWeight: 500,
                 display: { xs: 'none', sm: 'flex' },

@@ -53,19 +53,33 @@ const navItems: NavItem[] = [
 
 interface SidebarProps {
   drawerWidth: number;
+  onMobileToggle?: (open: boolean) => void;
+  mobileOpen?: boolean;
 }
 
-export default function Sidebar({ drawerWidth }: SidebarProps) {
+export default function Sidebar({ drawerWidth, onMobileToggle, mobileOpen: externalMobileOpen }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [internalMobileOpen, setInternalMobileOpen] = useState(false);
+
+  const mobileOpen = externalMobileOpen ?? internalMobileOpen;
 
   const handleNavClick = (path: string) => {
     router.push(path);
-    if (isMobile) setMobileOpen(false);
+    if (isMobile) {
+      if (onMobileToggle) onMobileToggle(false);
+      else setInternalMobileOpen(false);
+    }
   };
+
+  const closeMobile = () => {
+    if (onMobileToggle) onMobileToggle(false);
+    else setInternalMobileOpen(false);
+  };
+
+  const isDark = theme.palette.mode === 'dark';
 
   const drawerContent = (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -109,7 +123,7 @@ export default function Sidebar({ drawerWidth }: SidebarProps) {
           </Typography>
         </Box>
         {isMobile && (
-          <IconButton onClick={() => setMobileOpen(false)}>
+          <IconButton onClick={closeMobile}>
             <ChevronLeftIcon />
           </IconButton>
         )}
@@ -124,6 +138,7 @@ export default function Sidebar({ drawerWidth }: SidebarProps) {
             textTransform: 'uppercase',
             letterSpacing: '0.08em',
             fontSize: '0.7rem',
+            color: 'text.secondary',
           }}
         >
           Navigation
@@ -143,11 +158,12 @@ export default function Sidebar({ drawerWidth }: SidebarProps) {
                 minHeight: 44,
                 color: isActive ? 'primary.light' : 'text.secondary',
                 backgroundColor: isActive
-                  ? alpha(theme.palette.primary.main, 0.1)
+                  ? alpha(theme.palette.primary.main, isDark ? 0.1 : 0.08)
                   : 'transparent',
                 '&:hover': {
-                  backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                  backgroundColor: alpha(theme.palette.primary.main, isDark ? 0.08 : 0.06),
                 },
+                transition: 'all 0.15s ease',
               }}
             >
               <ListItemIcon
@@ -190,8 +206,10 @@ export default function Sidebar({ drawerWidth }: SidebarProps) {
           mx: 1.5,
           mb: 2,
           borderRadius: 3,
-          background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.12)}, ${alpha(theme.palette.secondary.main, 0.08)})`,
-          border: `1px solid ${alpha(theme.palette.primary.main, 0.15)}`,
+          background: isDark
+            ? `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.12)}, ${alpha(theme.palette.secondary.main, 0.08)})`
+            : `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.06)}, ${alpha(theme.palette.secondary.main, 0.04)})`,
+          border: `1px solid ${alpha(theme.palette.primary.main, isDark ? 0.15 : 0.1)}`,
         }}
       >
         <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
@@ -210,7 +228,7 @@ export default function Sidebar({ drawerWidth }: SidebarProps) {
       <Drawer
         variant="temporary"
         open={mobileOpen}
-        onClose={() => setMobileOpen(false)}
+        onClose={closeMobile}
         ModalProps={{ keepMounted: true }}
         sx={{
           display: { xs: 'block', md: 'none' },

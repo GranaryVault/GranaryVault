@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { inter } from '@/theme/fonts';
 import ThemeRegistry from '@/theme/ThemeRegistry';
 
 export const metadata: Metadata = {
@@ -9,8 +10,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body style={{ margin: 0 }}>
+    <html lang="en" className={inter.variable}>
+      <body style={{ margin: 0, fontFamily: inter.style.fontFamily }}>
         <ThemeRegistry>{children}</ThemeRegistry>
       </body>
     </html>
