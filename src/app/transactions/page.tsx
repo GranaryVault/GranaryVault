@@ -4,15 +4,12 @@ import { useEffect, useState } from 'react';
 import {
   Box, Grid, Card, CardContent, Typography, Button, Chip, alpha, useTheme,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Dialog, DialogTitle, DialogContent, DialogActions, TextField, Select,
-  MenuItem, FormControl, InputLabel, Tabs, Tab, LinearProgress,
+  Tabs, Tab,
 } from '@mui/material';
-import {
-  Add as AddIcon, Send as SendIcon, OpenInNew as OpenIcon,
-  ContentCopy as CopyIcon, FilterList as FilterIcon,
-} from '@mui/icons-material';
+import { Send as SendIcon } from '@mui/icons-material';
 import AppLayout from '@/components/Layout/AppLayout';
 import CrossBorderPanel from '@/components/Transactions/CrossBorderPanel';
+import SendPaymentDialog from '@/components/Transactions/SendPaymentDialog';
 import { useTreasuryStore } from '@/store/treasuryStore';
 import { shortenAddress, getExplorerTxUrl } from '@/lib/stellar';
 
@@ -31,7 +28,7 @@ export default function TransactionsPage() {
   const theme = useTheme();
   const { transactions, isLoading, initialize } = useTreasuryStore();
   const [tab, setTab] = useState(0);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [sendOpen, setSendOpen] = useState(false);
 
   useEffect(() => { if (transactions.length === 0) initialize(); }, [transactions.length, initialize]);
 
@@ -44,11 +41,11 @@ export default function TransactionsPage() {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1, flexWrap: 'wrap', gap: 2 }}>
           <Box>
             <Typography variant="h4">Transactions</Typography>
-            <Typography variant="body1" color="text.secondary">Create, approve, and track treasury transactions.</Typography>
+            <Typography variant="body1" color="text.secondary">Create, approve, and track treasury transactions on Stellar Testnet.</Typography>
           </Box>
-          <Button variant="contained" startIcon={<SendIcon />} onClick={() => setDialogOpen(true)}
+          <Button variant="contained" startIcon={<SendIcon />} onClick={() => setSendOpen(true)}
             sx={{ borderRadius: 2.5, textTransform: 'none' }}>
-            New Payment
+            Send Payment
           </Button>
         </Box>
 
@@ -139,36 +136,8 @@ export default function TransactionsPage() {
           <CrossBorderPanel />
         </Box>
 
-        {/* New Payment Dialog */}
-        <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
-          <DialogTitle>New Treasury Payment</DialogTitle>
-          <DialogContent>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-              <FormControl fullWidth size="small"><InputLabel>Treasury</InputLabel>
-                <Select defaultValue="treasury-1" label="Treasury">
-                  <MenuItem value="treasury-1">Main Operations Treasury</MenuItem>
-                  <MenuItem value="treasury-2">R&D Department Fund</MenuItem>
-                  <MenuItem value="treasury-3">Grant Distribution Fund</MenuItem>
-                </Select>
-              </FormControl>
-              <TextField label="Recipient Address" size="small" fullWidth placeholder="GABC..." />
-              <TextField label="Amount" size="small" type="number" fullWidth />
-              <FormControl fullWidth size="small"><InputLabel>Asset</InputLabel>
-                <Select defaultValue="USDC" label="Asset">
-                  <MenuItem value="USDC">USDC</MenuItem><MenuItem value="XLM">XLM (Native)</MenuItem>
-                </Select>
-              </FormControl>
-              <TextField label="Memo (optional)" size="small" fullWidth multiline rows={2} />
-            </Box>
-          </DialogContent>
-          <DialogActions sx={{ p: 2.5 }}>
-            <Button onClick={() => setDialogOpen(false)} sx={{ textTransform: 'none' }}>Cancel</Button>
-            <Button variant="contained" onClick={() => setDialogOpen(false)}
-              sx={{ textTransform: 'none', borderRadius: 2.5 }}>
-              Submit for Approval
-            </Button>
-          </DialogActions>
-        </Dialog>
+        {/* Real Send Payment Dialog */}
+        <SendPaymentDialog open={sendOpen} onClose={() => setSendOpen(false)} />
       </Box>
     </AppLayout>
   );
