@@ -30,6 +30,7 @@ import {
   Groups as BatchIcon,
   ChevronLeft as ChevronLeftIcon,
 } from '@mui/icons-material';
+import { useWallet } from '@/context/WalletContext';
 
 interface NavItem {
   label: string;
@@ -63,6 +64,7 @@ export default function Sidebar({ drawerWidth, onMobileToggle, mobileOpen: exter
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [internalMobileOpen, setInternalMobileOpen] = useState(false);
+  const { isConnected } = useWallet();
 
   const mobileOpen = externalMobileOpen ?? internalMobileOpen;
 
@@ -215,8 +217,11 @@ export default function Sidebar({ drawerWidth, onMobileToggle, mobileOpen: exter
         <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
           Stellar Testnet
         </Typography>
-        <Typography variant="caption" sx={{ color: theme.palette.success.main }}>
-          ● Connected
+        <Typography
+          variant="caption"
+          sx={{ color: isConnected ? theme.palette.success.main : theme.palette.text.secondary }}
+        >
+          {isConnected ? '● Connected' : '○ Not Connected'}
         </Typography>
       </Box>
     </Box>
