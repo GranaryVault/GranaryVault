@@ -11,6 +11,7 @@ import {
   PlayArrow as PlayIcon, Cancel as CancelIcon, CalendarMonth as CalendarIcon,
 } from '@mui/icons-material';
 import AppLayout from '@/components/Layout/AppLayout';
+import PayoutCalendar from '@/components/Payouts/PayoutCalendar';
 import { useTreasuryStore } from '@/store/treasuryStore';
 import { shortenAddress } from '@/lib/stellar';
 import type { PayoutFrequency } from '@/types';
@@ -132,6 +133,10 @@ export default function PayoutsPage() {
             </Grid>
           ))}
         </Grid>
+
+        <Box sx={{ mt: 4 }}>
+          <PayoutCalendar />
+        </Box>
 
         {/* Schedule Dialog */}
         <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
