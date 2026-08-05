@@ -8,12 +8,28 @@ import {
   Keypair,
 } from '@stellar/stellar-sdk';
 
-// ── Network ────────────────────────────────────────────────────────────────────
-export const STELLAR_NETWORK = 'TESTNET' as const;
-export const NETWORK_PASSPHRASE = Networks.TESTNET;
-export const HORIZON_URL = 'https://horizon-testnet.stellar.org';
-export const SOROBAN_RPC_URL = 'https://soroban-testnet.stellar.org';
-export const EXPLORER_BASE_URL = 'https://stellar.expert/explorer/testnet';
+// ── Network (env-driven for easy Mainnet migration) ────────────────────────────
+const NETWORK_MODE = (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_STELLAR_NETWORK) || 'TESTNET';
+
+export const STELLAR_NETWORK = NETWORK_MODE as 'TESTNET' | 'PUBLIC';
+
+export const NETWORK_PASSPHRASE =
+  NETWORK_MODE === 'PUBLIC' ? Networks.PUBLIC : Networks.TESTNET;
+
+export const HORIZON_URL =
+  NETWORK_MODE === 'PUBLIC'
+    ? 'https://horizon.stellar.org'
+    : (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_HORIZON_URL) || 'https://horizon-testnet.stellar.org';
+
+export const SOROBAN_RPC_URL =
+  NETWORK_MODE === 'PUBLIC'
+    ? 'https://soroban.stellar.org'
+    : (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_SOROBAN_RPC_URL) || 'https://soroban-testnet.stellar.org';
+
+export const EXPLORER_BASE_URL =
+  NETWORK_MODE === 'PUBLIC'
+    ? 'https://stellar.expert/explorer/public'
+    : 'https://stellar.expert/explorer/testnet';
 
 // ── Horizon server (lazy) ──────────────────────────────────────────────────────
 let horizonServer: Horizon.Server | null = null;
