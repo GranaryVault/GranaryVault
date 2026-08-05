@@ -12,6 +12,7 @@ import {
   ContentCopy as CopyIcon, FilterList as FilterIcon,
 } from '@mui/icons-material';
 import AppLayout from '@/components/Layout/AppLayout';
+import CrossBorderPanel from '@/components/Transactions/CrossBorderPanel';
 import { useTreasuryStore } from '@/store/treasuryStore';
 import { shortenAddress, getExplorerTxUrl } from '@/lib/stellar';
 
@@ -133,6 +134,10 @@ export default function TransactionsPage() {
             </TableContainer>
           </CardContent>
         </Card>
+
+        <Box sx={{ mt: 4 }}>
+          <CrossBorderPanel />
+        </Box>
 
         {/* New Payment Dialog */}
         <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
