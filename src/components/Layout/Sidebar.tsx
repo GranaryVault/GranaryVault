@@ -28,10 +28,12 @@ import {
   Receipt as AuditIcon,
   Settings as SettingsIcon,
   Groups as BatchIcon,
+  TrendingUp as ForecastIcon,
   ChevronLeft as ChevronLeftIcon,
 } from '@mui/icons-material';
 import { useWallet } from '@/context/WalletContext';
 import AccountSwitcher from '@/components/Layout/AccountSwitcher';
+import EventStreamIndicator from '@/components/Layout/EventStreamIndicator';
 
 interface NavItem {
   label: string;
@@ -50,6 +52,7 @@ const navItems: NavItem[] = [
   { label: 'Reports', path: '/reports', icon: <ReportsIcon /> },
   { label: 'Analytics', path: '/analytics', icon: <AnalyticsIcon /> },
   { label: 'Audit Trail', path: '/audit', icon: <AuditIcon /> },
+  { label: 'Forecasting', path: '/forecasting', icon: <ForecastIcon /> },
   { label: 'Settings', path: '/settings', icon: <SettingsIcon /> },
 ];
 
@@ -206,6 +209,10 @@ export default function Sidebar({ drawerWidth, onMobileToggle, mobileOpen: exter
           );
         })}
       </List>
+
+      <Box sx={{ px: 2, mb: 1 }}>
+        <EventStreamIndicator />
+      </Box>
 
       <Box
         sx={{
