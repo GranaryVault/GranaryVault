@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Grid,
@@ -22,15 +22,15 @@ import {
 } from '@mui/material';
 import {
   Add as AddIcon,
-  ContentCopy as CopyIcon,
-  OpenInNew as OpenIcon,
   PersonAdd as PersonAddIcon,
   Settings as SettingsIcon,
 } from '@mui/icons-material';
 import AppLayout from '@/components/Layout/AppLayout';
 import TreasuryHealthBadge from '@/components/Treasury/TreasuryHealthBadge';
+import MultiSigConfig from '@/components/Treasury/MultiSigConfig';
 import { useTreasuryStore } from '@/store/treasuryStore';
-import { shortenAddress, getExplorerAccountUrl } from '@/lib/stellar';
+import { shortenAddress } from '@/lib/stellar';
+import type { Signer } from '@/types';
 
 function formatCurrency(amount: number, currency?: string): string {
   const cur = currency || 'USD';
@@ -43,10 +43,23 @@ function formatCurrency(amount: number, currency?: string): string {
 export default function TreasuryPage() {
   const theme = useTheme();
   const { treasuries, isLoading, initialize } = useTreasuryStore();
+  const [configOpen, setConfigOpen] = useState(false);
+  const [selectedTreasury, setSelectedTreasury] = useState<string>('');
 
   useEffect(() => {
     if (treasuries.length === 0) initialize();
   }, [treasuries.length, initialize]);
+
+  const handleOpenConfig = (treasuryId: string) => {
+    setSelectedTreasury(treasuryId);
+    setConfigOpen(true);
+  };
+
+  const handleSaveConfig = (_signers: Signer[], _threshold: number) => {
+    setConfigOpen(false);
+  };
+
+  const selectedTreasuryData = treasuries.find((t) => t.id === selectedTreasury);
 
   const totalBalance = treasuries.reduce((sum, t) => sum + t.balance, 0);
   const healthScore = treasuries.length > 0
@@ -215,6 +228,7 @@ export default function TreasuryPage() {
                           size="small"
                           variant="outlined"
                           startIcon={<SettingsIcon />}
+                          onClick={() => handleOpenConfig(treasury.id)}
                           sx={{ flex: 1, borderRadius: 2, textTransform: 'none', fontSize: '0.75rem' }}
                         >
                           Configure
@@ -274,6 +288,15 @@ export default function TreasuryPage() {
             </Card>
           </>
         )}
+
+        <MultiSigConfig
+          open={configOpen}
+          onClose={() => setConfigOpen(false)}
+          treasuryName={selectedTreasuryData?.name}
+          initialSigners={selectedTreasuryData?.signers || []}
+          initialThreshold={selectedTreasuryData?.threshold || 2}
+          onSave={handleSaveConfig}
+        />
       </Box>
     </AppLayout>
   );
