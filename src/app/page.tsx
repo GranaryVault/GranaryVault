@@ -11,6 +11,7 @@ import {
   ArrowForward as ArrowIcon,
 } from '@mui/icons-material';
 import AppLayout from '@/components/Layout/AppLayout';
+import LiveBalanceCard from '@/components/Treasury/LiveBalanceCard';
 import { useTreasuryStore } from '@/store/treasuryStore';
 
 const ISO_CURRENCIES = ['USD', 'EUR', 'GBP', 'JPY'];
@@ -106,7 +107,12 @@ export default function DashboardPage() {
           </Grid>
         ) : (
           <>
-            {/* Metrics Grid */}
+            {/* Live On-Chain Balance */}
+        <Box sx={{ mb: 4 }}>
+          <LiveBalanceCard />
+        </Box>
+
+        {/* Metrics Grid */}
             <Grid container spacing={3} sx={{ mb: 4 }}>
               {metrics.map((metric) => (
                 <Grid size={{ xs: 12, sm: 6, lg: 3 }} key={metric.label}>

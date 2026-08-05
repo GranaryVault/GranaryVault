@@ -27,6 +27,7 @@ import {
 } from '@mui/icons-material';
 import AppLayout from '@/components/Layout/AppLayout';
 import TreasuryHealthBadge from '@/components/Treasury/TreasuryHealthBadge';
+import LiveBalanceCard from '@/components/Treasury/LiveBalanceCard';
 import MultiSigConfig from '@/components/Treasury/MultiSigConfig';
 import { useTreasuryStore } from '@/store/treasuryStore';
 import { shortenAddress } from '@/lib/stellar';
@@ -82,6 +83,10 @@ export default function TreasuryPage() {
             </Button>
             <TreasuryHealthBadge score={healthScore} />
           </Box>
+        </Box>
+
+        <Box sx={{ mb: 4 }}>
+          <LiveBalanceCard />
         </Box>
 
         {isLoading ? (
