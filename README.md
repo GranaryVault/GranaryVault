@@ -23,6 +23,8 @@ GranaryVault empowers organizations, DAOs, nonprofits, grant programs, and insti
 | **Audit Trail** | Immutable activity log with timestamps, actors, categories, and amounts |
 | **Notifications & Alerts** | Configurable alerts for approvals, payments, budgets, and policy violations |
 | **Webhooks** | Real-time event delivery with retry mechanisms for enterprise integrations |
+| **Forecasting** | Financial forecasting with projected balances, cash flow analysis, confidence scoring |
+| **Live Streaming** | SSE-based real-time event streaming for live treasury updates and dashboard auto-refresh |
 | **Soroban Contracts** | On-chain treasury governance: signers, thresholds, approvals, and audit events |
 
 ---
@@ -144,6 +146,11 @@ GranaryVault follows a modular, production-ready architecture:
 | 23 | Multi-Account Management | ✅ |
 | 24 | Testing & CI/CD | ✅ |
 | 25 | Final Polish & Documentation | ✅ |
+| 26 | Real Blockchain Transactions | ✅ |
+| 27 | Real-time Event Streaming | ✅ |
+| 28 | Enhanced Soroban Contract | ✅ |
+| 29 | Production Hardening | ✅ |
+| 30 | Forecasting & Gaps | ✅ |
 
 ---
 
