@@ -31,6 +31,7 @@ import {
   ChevronLeft as ChevronLeftIcon,
 } from '@mui/icons-material';
 import { useWallet } from '@/context/WalletContext';
+import AccountSwitcher from '@/components/Layout/AccountSwitcher';
 
 interface NavItem {
   label: string;
@@ -145,6 +146,10 @@ export default function Sidebar({ drawerWidth, onMobileToggle, mobileOpen: exter
         >
           Navigation
         </Typography>
+      </Box>
+
+      <Box sx={{ px: 2, mb: 2 }}>
+        <AccountSwitcher />
       </Box>
 
       <List sx={{ px: 1.5, flexGrow: 1 }}>
